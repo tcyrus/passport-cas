@@ -1,11 +1,13 @@
 # passport-cas
 
+This is a fork of the original [passport-cas](https://github.com/sadne/passport-cas) that fixes some bugs. All Pull Requests are welcome.
+
 Cas authentication strategies for Passport.
 
 
 ## Install
 
-    $ npm install passport-cas
+    $ npm install meghprkh/passport-cas --save
 
 #### Configure Strategy
 
@@ -106,7 +108,7 @@ CAS 2.0 will work with the CAS 3.0 configuration, but you need to set the valida
       validateURL: '/serviceValidate'
     }, function(profile, done) {
       var login = profile.user;
-    
+
       User.findOne({login: login}, function (err, user) {
         if (err) {
           return done(err);
