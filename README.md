@@ -7,7 +7,7 @@ Cas authentication strategies for Passport.
 
 ## Install
 
-    $ npm install meghprkh/passport-cas --save
+    $ npm install rcos/passport-cas --save
 
 #### Configure Strategy
 
