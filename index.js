@@ -7,7 +7,7 @@ var _ = require('underscore'),
     https = require('https'),
     parseString = require('xml2js').parseString,
     processors = require('xml2js/lib/processors'),
-    passport = require('passport'),
+    passport = require('passport-strategy'),
     uuid = require('uuid'),
     util = require('util');
 
@@ -17,7 +17,7 @@ function Strategy(options, verify) {
         options = {};
     }
     if (!verify) {
-        throw new Error('cas authentication strategy requires a verify function');
+        throw new TypeError('CAS authentication strategy requires a verify callback');
     }
     this.version = options.version || "CAS1.0";
     this.ssoBase = options.ssoBaseURL;
@@ -34,7 +34,6 @@ function Strategy(options, verify) {
 
     passport.Strategy.call(this);
 
-
     this.name = 'cas';
     this._verify = verify;
     this._passReqToCallback = options.passReqToCallback;
@@ -50,7 +49,7 @@ function Strategy(options, verify) {
     switch (this.version) {
         case "CAS1.0":
             this._validateUri = "/validate";
-            this._validate = function (req, body, verified) {
+            this._validate = function(req, body, verified) {
                 var lines = body.split('\n');
                 if (lines.length >= 1) {
                     if (lines[0] === 'no') {
@@ -70,8 +69,8 @@ function Strategy(options, verify) {
         case "CAS3.0":
             if (this.useSaml) {
                 this._validateUri = "/samlValidate";
-                this._validate = function (req, body, verified) {
-                    parseString(body, xmlParseOpts, function (err, result) {
+                this._validate = function(req, body, verified) {
+                    parseString(body, xmlParseOpts, function(err, result) {
                         if (err) {
                             return verified(new Error('The response from the server was bad'));
                         }
@@ -102,8 +101,8 @@ function Strategy(options, verify) {
                 };
             } else {
                 this._validateUri = "/p3/serviceValidate";
-                this._validate = function (req, body, verified) {
-                    parseString(body, xmlParseOpts, function (err, result) {
+                this._validate = function(req, body, verified) {
+                    parseString(body, xmlParseOpts, function(err, result) {
                         if (err) {
                             return verified(new Error('The response from the server was bad'));
                         }
@@ -130,7 +129,7 @@ function Strategy(options, verify) {
             }
             break;
         default:
-            throw new Error('unsupported version ' + this.version);
+            throw new Error('Unsupported version ' + this.version);
     }
 }
 
@@ -143,7 +142,7 @@ Strategy.prototype.service = function(req) {
     return url.format(parsedURL);
 };
 
-Strategy.prototype.authenticate = function (req, options) {
+Strategy.prototype.authenticate = function(req, options) {
     options = options || {};
 
     // CAS Logout flow as described in
@@ -164,7 +163,7 @@ Strategy.prototype.authenticate = function (req, options) {
 
         redirectURL.query.service = service;
         // copy loginParams in login query
-        for (var property in options.loginParams ) {
+        for (var property in options.loginParams) {
             var loginParam = options.loginParams[property];
             if (loginParam) {
                 redirectURL.query[property] = loginParam;
@@ -174,7 +173,7 @@ Strategy.prototype.authenticate = function (req, options) {
     }
 
     var self = this;
-    var verified = function (err, user, info) {
+    var verified = function(err, user, info) {
         if (err) {
             return self.error(err);
         }
@@ -185,13 +184,13 @@ Strategy.prototype.authenticate = function (req, options) {
     };
     var _validateUri = this.validateURL || this._validateUri;
 
-    var _handleResponse = function (response) {
+    var _handleResponse = function(response) {
         response.setEncoding('utf8');
         var body = '';
-        response.on('data', function (chunk) {
+        response.on('data', function(chunk) {
             return body += chunk;
         });
-        return response.on('end', function () {
+        return response.on('end', function() {
             return self._validate(req, body, verified);
         });
     };
@@ -212,7 +211,7 @@ Strategy.prototype.authenticate = function (req, options) {
             })
         }, _handleResponse);
 
-        request.on('error', function (e) {
+        request.on('error', function(e) {
             return self.fail(new Error(e));
         });
         request.write(soapEnvelope);
@@ -230,7 +229,7 @@ Strategy.prototype.authenticate = function (req, options) {
             })
         }, _handleResponse);
 
-        get.on('error', function (e) {
+        get.on('error', function(e) {
             return self.fail(new Error(e));
         });
     }
