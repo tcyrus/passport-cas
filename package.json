@@ -22,9 +22,7 @@
   "dependencies": {
     "uuid": "~3.0.1",
     "underscore": "^1.8.3",
-    "xml2js": "^0.4.16"
-  },
-  "peerDependencies": {
-    "passport": "^0.3.2"
+    "xml2js": "^0.4.16",
+    "passport-strategy": "1.x.x"
   }
 }
